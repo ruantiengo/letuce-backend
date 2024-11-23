@@ -67,7 +67,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         })
       };
     } else {
-      throw new Error("Resultado da autenticação é indefinido");
+      throw new Error(authResult.ChallengeName);
     }
   } catch (error) {
     console.error("Erro de login:", error);
