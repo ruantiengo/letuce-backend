@@ -54,7 +54,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     const command = new InitiateAuthCommand(params);
     const authResult: InitiateAuthCommandOutput = await cognitoClient.send(command);
-
+    console.log("Resultado da autenticação:", authResult);
+    
     if (authResult.AuthenticationResult) {
       return {
         statusCode: 200,
