@@ -4,22 +4,29 @@
     "description": "Lambda function for authentication using Cognito (TypeScript)",
     "main": "src/index.ts",
     "scripts": {
-      "build": "tsc src/index.ts && cp src/index.js index.mjs",
-      "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-      "test": "jest",
-      "deploy": "npm run build && echo \"Deploy script not implemented\" && exit 1"
+        "build": "tsc && cp dist/index.js dist/index.mjs",
+        "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+        "test": "jest",
+        "deploy": "npm run build && echo \"Deploy script not implemented\" && exit 1"
     },
-    "keywords": ["lambda", "authentication", "cognito", "typescript"],
+    "keywords": [
+        "lambda",
+        "authentication",
+        "cognito",
+        "typescript"
+    ],
     "author": "",
     "license": "ISC",
     "dependencies": {
-      "@aws-sdk/client-cognito-identity-provider": "^3.x.x"
+        "@aws-sdk/client-cognito-identity-provider": "^3.x.x"
     },
     "devDependencies": {
-      "@types/aws-lambda": "^8.10.92",
-      "@types/node": "^14.14.31",
-      "ts-node-dev": "^1.1.6",
-      "typescript": "^4.2.3"
+        "@types/aws-lambda": "^8.10.92",
+        "@types/express": "^5.0.0",
+        "@types/node": "^14.14.31",
+        "rimraf": "^6.0.1",
+        "ts-node": "^10.9.2",
+        "ts-node-dev": "^1.1.6",
+        "typescript": "^5.7.2"
     }
-  }
-  
+}
