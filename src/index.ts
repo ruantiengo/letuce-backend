@@ -28,7 +28,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   const body = JSON.parse(event.body);
-  const { username, password, newPassword } = body;
+  const { username, password, newPassword, ...otherAttributes } = body;
 
   if (!username || !password) {
     return {
@@ -82,6 +82,23 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         };
       }
 
+      // Retrieve required attributes from ChallengeParameters
+      const requiredAttributes = authResult.ChallengeParameters?.requiredAttributes
+        ? JSON.parse(authResult.ChallengeParameters.requiredAttributes)
+        : [];
+
+      const userAttributes: { [key: string]: string } = {};
+
+      for (const attribute of requiredAttributes) {
+        if (!body[attribute]) {
+          return {
+            statusCode: 400,
+            body: JSON.stringify({ message: `O atributo '${attribute}' é obrigatório` }),
+          };
+        }
+        userAttributes[attribute] = body[attribute];
+      }
+
       const respondParams: RespondToAuthChallengeCommandInput = {
         ClientId: clientId,
         ChallengeName: "NEW_PASSWORD_REQUIRED",
@@ -90,6 +107,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
           USERNAME: username,
           NEW_PASSWORD: newPassword,
           SECRET_HASH: secretHash,
+          ...userAttributes, // Include the required user attributes
         },
       };
 
