@@ -1,7 +1,7 @@
 import { CognitoIdentityProviderClient, InitiateAuthCommand, InitiateAuthCommandInput, InitiateAuthCommandOutput } from "@aws-sdk/client-cognito-identity-provider";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-const cognitoClient = new CognitoIdentityProviderClient({ region: "us-east-1" }); // Substitua pela sua região
+const cognitoClient = new CognitoIdentityProviderClient({ region: "sa-east-1" }); // Substitua pela sua região
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   if (!event.body) {
