@@ -43,7 +43,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   const params: InitiateAuthCommandInput = {
     AuthFlow: "USER_PASSWORD_AUTH",
-    ClientId: clientId,
+    ClientId: clientSecret,
     AuthParameters: {
       USERNAME: username,
       PASSWORD: password,
