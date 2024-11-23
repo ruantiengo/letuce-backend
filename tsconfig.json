@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES2022",               // Define a versão do JavaScript. Pode ser ES2020, ES2022, ESNext, etc.
-    "module": "ESNext",               // Gera código com `import` e `export`.
+    "target": "ES2023",               // Define a versão do JavaScript. Pode ser ES2020, ES2022, ESNext, etc.
+    "module": "CommonJS",             // Gera código com `require` e `module.exports`.
     "outDir": "./",               // Pasta de saída para os arquivos compilados.
     "rootDir": "./src",               // Diretório raiz dos arquivos TypeScript.
     "moduleResolution": "node",      // Resolve módulos no estilo Node.js.
