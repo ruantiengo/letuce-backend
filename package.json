@@ -4,7 +4,7 @@
     "description": "Lambda function for authentication using Cognito (TypeScript)",
     "main": "dist/index.js",
     "scripts": {
-      "build": "tsc",
+      "build": "tsc src/index.ts",
       "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
       "test": "jest",
       "deploy": "npm run build && echo \"Deploy script not implemented\" && exit 1"
