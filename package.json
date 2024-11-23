@@ -2,12 +2,13 @@
     "name": "lambda-auth-ts",
     "version": "1.0.0",
     "description": "Lambda function for authentication using Cognito (TypeScript)",
-    "main": "src/index.ts",
+    "main": "dist/index.mjs",
     "scripts": {
         "build": "tsc && cp dist/index.js dist/index.mjs",
         "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
         "test": "jest",
-        "deploy": "npm run build && echo \"Deploy script not implemented\" && exit 1"
+        "deploy": "npm run build && echo \"Deploy script not implemented\" && exit 1",
+        "start": "node index.mjs"
     },
     "keywords": [
         "lambda",
