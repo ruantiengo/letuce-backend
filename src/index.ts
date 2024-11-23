@@ -1,7 +1,15 @@
 import { CognitoIdentityProviderClient, InitiateAuthCommand, InitiateAuthCommandInput, InitiateAuthCommandOutput } from "@aws-sdk/client-cognito-identity-provider";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import * as crypto from "crypto";
 
-const cognitoClient = new CognitoIdentityProviderClient({ region: "sa-east-1" }); // Substitua pela sua região
+const cognitoClient = new CognitoIdentityProviderClient({ region: "sa-east-1" });
+
+function calculateSecretHash(clientId: string, clientSecret: string, username: string): string {
+  const message = username + clientId;
+  const hmac = crypto.createHmac("sha256", clientSecret);
+  hmac.update(message);
+  return hmac.digest("base64");
+}
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   if (!event.body) {
@@ -21,12 +29,25 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     };
   }
 
+  const clientId = process.env.APP_CLIENT_ID; // Certifique-se de definir no Lambda
+  const clientSecret = process.env.APP_CLIENT_SECRET; // Certifique-se de definir no Lambda
+
+  if (!clientId || !clientSecret) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: "APP_CLIENT_ID ou APP_CLIENT_SECRET não configurados" })
+    };
+  }
+
+  const secretHash = calculateSecretHash(clientId, clientSecret, username);
+
   const params: InitiateAuthCommandInput = {
     AuthFlow: "USER_PASSWORD_AUTH",
-    ClientId: process.env.APP_CLIENT_ID,
+    ClientId: clientId,
     AuthParameters: {
       USERNAME: username,
-      PASSWORD: password
+      PASSWORD: password,
+      SECRET_HASH: secretHash
     }
   };
 
@@ -58,4 +79,3 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     };
   }
 };
-
