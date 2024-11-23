@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "Lambda function for authentication using Cognito (TypeScript)",
     "main": "dist/index.mjs",
+    "type": "module",
     "scripts": {
         "build": "tsc && cp dist/index.js dist/index.mjs",
         "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
