@@ -5,7 +5,6 @@
     "main": "src/index.ts",
     "scripts": {
       "build": "tsc src/index.ts && cp src/index.js index.mjs",
-
       "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
       "test": "jest",
       "deploy": "npm run build && echo \"Deploy script not implemented\" && exit 1"
