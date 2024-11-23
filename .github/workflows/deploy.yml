@@ -24,7 +24,9 @@ jobs:
       run: npm run build
 
     - name: Zip artifact
-      run: zip -r9 function.zip dist/* package.json
+      run: |
+        cp -r dist/* .
+        zip -r9 function.zip * package.json
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
