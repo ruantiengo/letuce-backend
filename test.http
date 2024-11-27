@@ -1,10 +1,13 @@
 ### Requisição GET com Header "token"
 GET https://h5qxh4dth8.execute-api.sa-east-1.amazonaws.com/prod/hello
 Authorization: allow
+
+
 ### Requisição POST para criar um cliente
-POST https://<api-id>.execute-api.<region>.amazonaws.com/customers
-Content-Type: application/json
+POST https://h5qxh4dth8.execute-api.sa-east-1.amazonaws.com/prod/customers
 Authorization: allow
+Content-Type: application/json
+
 {
     "customerId": "123",
     "nome": "João da Silva",
@@ -14,3 +17,7 @@ Authorization: allow
     "endereco": "Rua das Flores, 123",
     "habilitado": true
 }
+
+### Requisição GET para buscar um cliente
+GET https://h5qxh4dth8.execute-api.sa-east-1.amazonaws.com/prod/customers/123
+Authorization: allow
