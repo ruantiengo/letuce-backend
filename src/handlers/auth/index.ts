@@ -24,13 +24,13 @@ const generatePolicy = (
 export const handler = async (
   event: APIGatewayTokenAuthorizerEvent
 ): Promise<{ principalId: string; policyDocument: PolicyDocument }> => {
-  console.log('Authorization invoked', JSON.stringify(event, null, 2));
+  // console.log('Authorization invoked', JSON.stringify(event, null, 2));
 
-  const token = event.authorizationToken;
+  // const token = event.authorizationToken;
 
-  if (!token || token !== 'allow') {
-    return generatePolicy('user', 'Deny', event.methodArn);
-  }
+  // if (!token || token !== 'allow') {
+  //   return generatePolicy('user', 'Deny', event.methodArn);
+  // }
 
   return generatePolicy('user', 'Allow', event.methodArn);
 };

@@ -1,10 +1,10 @@
 openapi: 3.0.1
 info:
   title: Letuce Backend API
-  description: API para gerenciar clientes com suporte a CRUD e exclusão lógica.
+  description: API para gerenciar clientes, fornecedores e produtos com suporte a CRUD e exclusão lógica.
   version: 1.0.0
 servers:
-  - url: https://<api-id>.execute-api.<region>.amazonaws.com
+  - url: https://h5qxh4dth8.execute-api.sa-east-1.amazonaws.com/prod
     description: API Gateway endpoint
 
 paths:
@@ -17,70 +17,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                customerId:
-                  type: string
-                  description: ID único do cliente.
-                  example: "12345"
-                nome:
-                  type: string
-                  description: Nome completo do cliente.
-                  example: "João da Silva"
-                email:
-                  type: string
-                  description: E-mail do cliente.
-                  example: "joao@example.com"
-                cpfCnpj:
-                  type: string
-                  description: CPF ou CNPJ do cliente.
-                  example: "12345678901"
-                dataNascimento:
-                  type: string
-                  format: date
-                  description: Data de nascimento do cliente.
-                  example: "1990-01-01"
-                endereco:
-                  type: string
-                  description: Endereço do cliente.
-                  example: "Rua das Flores, 123"
-                contatos:
-                  type: array
-                  description: Lista de contatos do cliente.
-                  items:
-                    type: object
-                    properties:
-                      descricao:
-                        type: string
-                        example: "Residencial"
-                      telefone:
-                        type: string
-                        example: "(11) 1111-1111"
-                habilitado:
-                  type: boolean
-                  description: Indica se o cliente está habilitado.
-                  example: true
-                observacao:
-                  type: string
-                  description: Observação sobre o cliente.
-                  example: "Cliente VIP"
-                sacLider:
-                  type: string
-                  description: Nome do SAC líder associado ao cliente.
-                  example: "Sim"
+              $ref: '#/components/schemas/Customer'
       responses:
         '201':
           description: Cliente criado com sucesso.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  customer:
-                    type: object
-                    additionalProperties: true
+                $ref: '#/components/schemas/CustomerResponse'
         '400':
           description: Dados inválidos.
     get:
@@ -97,8 +41,7 @@ paths:
                   customers:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: true
+                      $ref: '#/components/schemas/Customer'
         '500':
           description: Erro interno do servidor.
 
@@ -107,34 +50,238 @@ paths:
       summary: Obtém um cliente pelo ID
       operationId: getCustomer
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID do cliente.
-          example: "12345"
+        - $ref: '#/components/parameters/CustomerId'
       responses:
         '200':
           description: Cliente encontrado.
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
+                $ref: '#/components/schemas/Customer'
         '404':
           description: Cliente não encontrado.
     put:
       summary: Atualiza um cliente
       operationId: updateCustomer
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID do cliente.
-          example: "12345"
+        - $ref: '#/components/parameters/CustomerId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+      responses:
+        '200':
+          description: Cliente atualizado com sucesso.
+        '404':
+          description: Cliente não encontrado.
+    delete:
+      summary: Exclui um cliente logicamente
+      operationId: deleteCustomer
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+      responses:
+        '200':
+          description: Cliente excluído logicamente.
+        '404':
+          description: Cliente não encontrado.
+
+  /suppliers:
+    post:
+      summary: Cria um novo fornecedor
+      operationId: createSupplier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Supplier'
+      responses:
+        '201':
+          description: Fornecedor criado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierResponse'
+        '400':
+          description: Dados inválidos.
+    get:
+      summary: Obtém a lista de fornecedores
+      operationId: listSuppliers
+      responses:
+        '200':
+          description: Lista de fornecedores.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  suppliers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Supplier'
+
+  /suppliers/{id}:
+    get:
+      summary: Obtém um fornecedor pelo ID
+      operationId: getSupplier
+      parameters:
+        - $ref: '#/components/parameters/SupplierId'
+      responses:
+        '200':
+          description: Fornecedor encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplier'
+        '404':
+          description: Fornecedor não encontrado.
+
+  /products:
+    post:
+      summary: Cria um novo produto
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '201':
+          description: Produto criado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '400':
+          description: Dados inválidos.
+    get:
+      summary: Obtém a lista de produtos
+      operationId: listProducts
+      responses:
+        '200':
+          description: Lista de produtos.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+
+components:
+  schemas:
+    Customer:
+      type: object
+      properties:
+        nome:
+          type: string
+          description: Nome do cliente.
+        email:
+          type: string
+          description: E-mail do cliente.
+        cpfCnpj:
+          type: string
+          description: CPF ou CNPJ.
+        dataNascimento:
+          type: string
+          format: date
+          description: Data de nascimento.
+        endereco:
+          type: string
+          description: Endereço.
+        contatos:
+          type: array
+          description: Lista de contatos.
+          items:
+            $ref: '#/components/schemas/Contact'
+        habilitado:
+          type: boolean
+          description: Se o cliente está habilitado.
+        observacao:
+          type: string
+          description: Observação.
+
+    Supplier:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nome do fornecedor.
+        email:
+          type: string
+          description: E-mail do fornecedor.
+        address:
+          type: string
+          description: Endereço.
+        contacts:
+          type: array
+          description: Contatos.
+          items:
+            $ref: '#/components/schemas/Contact'
+        headOffice:
+          type: string
+          description: Escritório matriz.
+        cpfCnpj:
+          type: string
+          description: CPF ou CNPJ.
+
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nome do produto.
+        defaultVolume:
+          type: string
+          description: Volume padrão.
+        unit:
+          type: string
+          description: Unidade.
+        quantityPerBox:
+          type: number
+          description: Quantidade por caixa.
+        purchasePriceUnit:
+          type: number
+          description: Preço de compra por unidade.
+        salePriceBox:
+          type: number
+          description: Preço de venda por caixa.
+
+    Contact:
+      type: object
+      properties:
+        description:
+          type: string
+          description: Tipo de contato.
+        phone:
+          type: string
+          description: Telefone.
+
+  parameters:
+    CustomerId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID do cliente.
+
+    SupplierId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID do fornecedor.
+
+  /specific-prices:
+    post:
+      summary: Cria um preço específico
       requestBody:
         required: true
         content:
@@ -142,77 +289,256 @@ paths:
             schema:
               type: object
               properties:
-                nome:
+                entityType:
                   type: string
-                  example: "João Atualizado"
-                email:
+                  description: Tipo da entidade (cliente ou fornecedor).
+                  example: "cliente"
+                entityId:
                   type: string
-                  example: "joao.atualizado@example.com"
-                cpfCnpj:
+                  description: ID do cliente ou fornecedor.
+                  example: "12345"
+                productId:
                   type: string
-                  example: "12345678901"
-                dataNascimento:
+                  description: ID do produto.
+                  example: "67890"
+                price:
+                  type: number
+                  description: Preço específico.
+                  example: 150.0
+                notes:
                   type: string
-                  format: date
-                  example: "1990-01-01"
-                endereco:
-                  type: string
-                  example: "Rua das Palmeiras, 456"
-                contatos:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      descricao:
-                        type: string
-                        example: "Comercial"
-                      telefone:
-                        type: string
-                        example: "(22) 2222-2222"
-                habilitado:
-                  type: boolean
-                  example: false
-                observacao:
-                  type: string
-                  example: "Alteração recente"
-                sacLider:
-                  type: string
-                  example: "Não"
+                  description: Observações.
+                  example: "Preço promocional"
+      responses:
+        '201':
+          description: Preço específico criado.
+    get:
+      summary: Lista todos os preços específicos
       responses:
         '200':
-          description: Cliente atualizado com sucesso.
+          description: Lista de preços específicos.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-        '400':
-          description: Dados inválidos.
-        '404':
-          description: Cliente não encontrado.
-    delete:
-      summary: Exclui um cliente logicamente
-      operationId: deleteCustomer
+                type: array
+                items:
+                  type: object
+                  properties:
+                    specificPriceId:
+                      type: string
+                    entityType:
+                      type: string
+                    entityId:
+                      type: string
+                    productId:
+                      type: string
+                    price:
+                      type: number
+                    notes:
+                      type: string
+  /specific-prices/{id}:
+    get:
+      summary: Obtém um preço específico pelo ID
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: string
-          description: ID do cliente.
-          example: "12345"
       responses:
         '200':
-          description: Cliente excluído logicamente.
+          description: Preço específico encontrado.
+    put:
+      summary: Atualiza um preço específico
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                entityType:
+                  type: string
+                entityId:
+                  type: string
+                productId:
+                  type: string
+                price:
+                  type: number
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Preço específico atualizado.
+    delete:
+      summary: Exclui um preço específico
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Preço específico excluído.
+  /sales-orders:
+    post:
+      summary: Cria um novo pedido de venda
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId:
+                  type: string
+                  description: ID do cliente.
+                  example: "customer-001"
+                products:
+                  type: array
+                  description: Lista de produtos no pedido.
+                  items:
+                    type: object
+                    properties:
+                      productId:
+                        type: string
+                        description: ID do produto.
+                      quantity:
+                        type: number
+                        description: Quantidade do produto.
+                      price:
+                        type: number
+                        description: Preço padrão do produto.
+                notes:
+                  type: string
+                  description: Observações sobre o pedido.
+      responses:
+        '201':
+          description: Pedido de venda criado.
+  /purchase-orders:
+    post:
+      summary: Cria um novo pedido de compra
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                supplierId:
+                  type: string
+                  description: ID do fornecedor.
+                  example: "supplier-001"
+                products:
+                  type: array
+                  description: Lista de produtos no pedido.
+                  items:
+                    type: object
+                    properties:
+                      productId:
+                        type: string
+                        description: ID do produto.
+                      quantity:
+                        type: number
+                        description: Quantidade do produto.
+                      price:
+                        type: number
+                        description: Preço de compra do produto.
+                notes:
+                  type: string
+                  description: Observações sobre o pedido.
+      responses:
+        '201':
+          description: Pedido de compra criado.
+    get:
+      summary: Lista todos os pedidos de compra
+      responses:
+        '200':
+          description: Lista de pedidos de compra.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Customer deleted logically"
-        '404':
-          description: Cliente não encontrado.
+                type: array
+                items:
+                  type: object
+                  properties:
+                    purchaseOrderId:
+                      type: string
+                    supplierId:
+                      type: string
+                    products:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          productId:
+                            type: string
+                          quantity:
+                            type: number
+                          price:
+                            type: number
+                    notes:
+                      type: string
+  /purchase-orders/{id}:
+    get:
+      summary: Obtém um pedido de compra pelo ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pedido de compra encontrado.
+    put:
+      summary: Atualiza um pedido de compra
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                supplierId:
+                  type: string
+                products:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      productId:
+                        type: string
+                      quantity:
+                        type: number
+                      price:
+                        type: number
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Pedido de compra atualizado.
+    delete:
+      summary: Exclui um pedido de compra
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pedido de compra excluído.

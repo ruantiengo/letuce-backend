@@ -1,7 +1,7 @@
 {
-  "name": "authorization-function",
+  "name": "suppliers",
   "version": "1.0.0",
-  "description": "Lambda function for API Gateway authorization",
+  "description": "Supplier function for API Gateway authorization",
   "main": "index.js",
   "type": "module",
   "scripts": {

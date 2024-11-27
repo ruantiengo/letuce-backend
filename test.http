@@ -2,6 +2,9 @@
 GET https://h5qxh4dth8.execute-api.sa-east-1.amazonaws.com/prod/hello
 Authorization: allow
 
+### Requisição GET com Header "Authorization
+GET https://h5qxh4dth8.execute-api.sa-east-1.amazonaws.com/prod/customers
+Authorization: allow
 
 ### Requisição POST para criar um cliente
 POST https://h5qxh4dth8.execute-api.sa-east-1.amazonaws.com/prod/customers
@@ -9,7 +12,6 @@ Authorization: allow
 Content-Type: application/json
 
 {
-    "customerId": "123",
     "nome": "João da Silva",
     "email": "joao@example.com",
     "cpfCnpj": "12345678901",
@@ -19,5 +21,5 @@ Content-Type: application/json
 }
 
 ### Requisição GET para buscar um cliente
-GET https://h5qxh4dth8.execute-api.sa-east-1.amazonaws.com/prod/customers/123
+GET https://h5qxh4dth8.execute-api.sa-east-1.amazonaws.com/prod/customers/01936e38-7f75-77bf-a91f-93692fa71d69
 Authorization: allow
