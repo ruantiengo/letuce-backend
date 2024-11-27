@@ -1,0 +1,45 @@
+name: CDK Deploy Pipeline
+
+on:
+  push:
+    branches:
+      - master # Executa o pipeline ao fazer push na branch main
+  pull_request:
+    branches:
+      - master # Valida mudanças em pull requests para a branch main
+
+jobs:
+  cdk-pipeline:
+    name: CDK Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checar o código
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # 2. Configurar o Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      # 3. Instalar dependências
+      - name: Install Dependencies
+        run: npm install
+
+      # 4. Rodar testes (opcional)
+      - name: Run Tests
+        run: npm test
+
+      # 5. Configurar AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1 # Substitua pela sua região
+
+      # 6. Deploy com AWS CDK
+      - name: Deploy CDK Stack
+        run: npx cdk deploy --all --require-approval never
