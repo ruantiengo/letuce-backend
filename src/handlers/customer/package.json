@@ -1,0 +1,21 @@
+{
+  "name": "authorization-function",
+  "version": "1.0.0",
+  "description": "Lambda function for API Gateway authorization",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild index.ts --bundle --platform=node --target=node16 --outdir=dist",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1692.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.114",
+    "esbuild": "^0.19.2",
+    "typescript": "^5.2.2"
+  }
+}
