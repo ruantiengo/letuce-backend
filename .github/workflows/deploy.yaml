@@ -40,10 +40,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1 # Substitua pela sua região
 
-      # 6. Bootstrap CDK
-      - name: Bootstrap CDK
-        run: npx cdk bootstrap
+      - name: Install dependencies
+        run: npm install
 
-      # 7. Deploy com AWS CDK
-      - name: Deploy CDK Stack
+      - name: Ensure Docker is running
+        run: |
+          sudo service docker start
+
+      - name: Deploy CDK stack
         run: npx cdk deploy --all --require-approval never
