@@ -4,6 +4,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as fs from 'fs';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 
 export class LetuceBackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -11,6 +12,23 @@ export class LetuceBackendStack extends cdk.Stack {
 
     const apiSpec = fs. readFileSync('openapi.yaml', 'utf8');
     
+        // DynamoDB: Tabela de clientes
+    const customersTable = new dynamodb.Table(this, 'CustomersTable', {
+      partitionKey: { name: 'customerId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // Ajusta automaticamente com base no uso
+      tableName: 'CustomersTable',
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // Destroi a tabela ao remover o stack (apenas para dev)
+    });
+
+    const customersFunction = new lambda.Function(this, 'CustomersFunction', {
+      runtime: lambda.Runtime.NODEJS_16_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('src/functions/customers'),
+      environment: {
+        CUSTOMERS_TABLE_NAME: customersTable.tableName, // Passa o nome da tabela como variável de ambiente
+      },
+    });
+
     // 1. Criar o User Pool do Cognito
     const userPool = new cognito.UserPool(this, 'LetuceUserPool', {
       userPoolName: 'LetuceUserPool',
@@ -74,6 +92,21 @@ export class LetuceBackendStack extends cdk.Stack {
       authorizer: lambdaAuthorizer,
       authorizationType: apigateway.AuthorizationType.CUSTOM,
     });
+
+    
+    // Permissões: Acesso do Lambda ao DynamoDB
+    customersTable.grantReadWriteData(customersFunction);
+
+    const customersResource = api.root.addResource('customers');
+    customersResource.addMethod('POST', new apigateway.LambdaIntegration(customersFunction)); 
+    customersResource.addMethod('GET', new apigateway.LambdaIntegration(customersFunction)); 
+
+    const customerResource = customersResource.addResource('{id}');
+    customerResource.addMethod('GET', new apigateway.LambdaIntegration(customersFunction)); 
+    customerResource.addMethod('PUT', new apigateway.LambdaIntegration(customersFunction)); 
+    customerResource.addMethod('DELETE', new apigateway.LambdaIntegration(customersFunction)); 
+ 
+
 
     // 7. Outputs (opcional)
     new cdk.CfnOutput(this, 'ApiUrl', {

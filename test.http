@@ -1,3 +1,16 @@
 ### Requisição GET com Header "token"
 GET https://h5qxh4dth8.execute-api.sa-east-1.amazonaws.com/prod/hello
 Authorization: allow
+### Requisição POST para criar um cliente
+POST https://<api-id>.execute-api.<region>.amazonaws.com/customers
+Content-Type: application/json
+Authorization: allow
+{
+    "customerId": "123",
+    "nome": "João da Silva",
+    "email": "joao@example.com",
+    "cpfCnpj": "12345678901",
+    "dataNascimento": "1990-01-01",
+    "endereco": "Rua das Flores, 123",
+    "habilitado": true
+}
