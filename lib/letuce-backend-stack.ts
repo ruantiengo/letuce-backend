@@ -44,22 +44,30 @@ export class LetuceBackendStack extends cdk.Stack {
       `),
     });
 
+        // Lambda: Authorization Function
+    const authorizationFunction = new lambda.Function(this, 'AuthorizationFunction', {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('src/handlers/authorization'),
+    });
+
     // 4. Configurar o API Gateway
     const api = new apigateway.RestApi(this, 'LetuceApiGateway', {
       restApiName: 'Letuce API Gateway',
       description: 'API Gateway for Letuce Backend',
     });
 
-    // 5. Criar o Authorizer Cognito para o API Gateway
-    const cognitoAuthorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'LetuceCognitoAuthorizer', {
-      cognitoUserPools: [userPool],
-    });
+    // Lambda Authorizer
+    const lambdaAuthorizer = new apigateway.TokenAuthorizer(this, 'LambdaAuthorizer', {
+      handler: authorizationFunction,
+    }); 
 
     // 6. Configurar o recurso `/hello` no API Gateway
-    const helloResource = api.root.addResource('hello'); // Rota: /hello
+
+    const helloResource = api.root.addResource('hello');
     helloResource.addMethod('GET', new apigateway.LambdaIntegration(helloFunction), {
-      authorizer: cognitoAuthorizer,
-      authorizationType: apigateway.AuthorizationType.COGNITO,
+      authorizer: lambdaAuthorizer,
+      authorizationType: apigateway.AuthorizationType.CUSTOM,
     });
 
     // 7. Outputs (opcional)
