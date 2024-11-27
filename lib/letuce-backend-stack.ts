@@ -45,10 +45,11 @@ export class LetuceBackendStack extends cdk.Stack {
     });
 
     // 4. Configurar o API Gateway
-    const api = new apigateway.RestApi(this, 'LetuceApiGateway', {
-      restApiName: 'Letuce API Gateway',
-      description: 'API Gateway for Letuce Backend',
-    });
+  // Criar o API Gateway a partir da especificação OpenAPI
+  const api = new apigateway.SpecRestApi(this, 'LetuceApi', {
+    restApiName: 'Letuce API',
+    apiDefinition: apigateway.ApiDefinition.fromInline(apiSpec),
+  });
 
     // 5. Criar o Authorizer Cognito para o API Gateway
     const cognitoAuthorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'LetuceCognitoAuthorizer', {
