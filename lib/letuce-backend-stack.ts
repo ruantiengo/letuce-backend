@@ -9,7 +9,7 @@ export class LetuceBackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const apiSpec = fs. readFileSync('openapi/api.yaml', 'utf8');
+    const apiSpec = fs. readFileSync('openapi.yaml', 'utf8');
     
     // 1. Criar o User Pool do Cognito
     const userPool = new cognito.UserPool(this, 'LetuceUserPool', {
