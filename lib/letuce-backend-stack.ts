@@ -21,9 +21,14 @@ export class LetuceBackendStack extends cdk.Stack {
     });
 
     const customersFunction = new lambda.Function(this, 'CustomersFunction', {
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
-      code: lambda.Code.fromAsset('src/functions/customers'),
+      code: lambda.Code.fromAsset('src/handlers/customer',  {
+        bundling: {
+          image: lambda.Runtime.NODEJS_22_X.bundlingImage,
+          command: ["bash", "-c", "npm install && npm run build && cp -r dist/* /asset-output/index.js"],
+        }
+    }),
       environment: {
         CUSTOMERS_TABLE_NAME: customersTable.tableName, // Passa o nome da tabela como variável de ambiente
       },
