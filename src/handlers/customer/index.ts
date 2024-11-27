@@ -1,4 +1,5 @@
 import { DynamoDB } from 'aws-sdk';
+import { v7 as uuidv7 } from 'uuid';
 
 const dynamoDb = new DynamoDB.DocumentClient();
 const tableName = process.env.CUSTOMERS_TABLE_NAME!;
@@ -11,7 +12,7 @@ export const handler = async (event: any) => {
       // Criar um novo cliente
       const data = JSON.parse(body);
       const customer = {
-        customerId: data.customerId, // Unique ID
+        customerId: uuidv7(),
         nome: data.nome,
         email: data.email,
         cpfCnpj: data.cpfCnpj,
