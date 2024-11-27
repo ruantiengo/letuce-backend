@@ -32,7 +32,7 @@ export class LetuceBackendStack extends cdk.Stack {
 
     // 3. Criar a Lambda Function
     const helloFunction = new lambda.Function(this, 'HelloFunction', {
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       code: lambda.Code.fromInline(`
         exports.handler = async function(event) {
