@@ -48,7 +48,12 @@ export class LetuceBackendStack extends cdk.Stack {
     const authorizationFunction = new lambda.Function(this, 'AuthorizationFunction', {
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
-      code: lambda.Code.fromAsset('src/handlers/auth'),
+      code: lambda.Code.fromAsset('src/handlers/auth', {
+        bundling: {
+          image: lambda.Runtime.NODEJS_22_X.bundlingImage,
+          command: ["bash", "-c", "npm install && npm run build && cp -r dist/* /asset-output/index.js"],
+        }
+      }),
     });
 
     // 4. Configurar o API Gateway

@@ -1,0 +1,3 @@
+### Requisição GET com Header "token"
+GET https://h5qxh4dth8.execute-api.sa-east-1.amazonaws.com/prod/hello
+Authorization: allow
