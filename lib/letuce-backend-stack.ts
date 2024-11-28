@@ -54,29 +54,29 @@ export class LetuceBackendStack extends cdk.Stack {
     const specificPricesTable = createDynamoDBTable('SpecificPricesTable', 'specificPriceId');
 
     // Create Lambda Functions with Environment Variables
-    const customersFunction = createLambdaFunction('CustomersFunction', 'src/handlers/customer', {
+    const customersFunction = createLambdaFunction('CustomersFunction',  {
       CUSTOMERS_TABLE_NAME: customersTable.tableName,
     });
 
-    const salesOrdersFunction = createLambdaFunction('SalesOrdersFunction', 'src/handlers/sales-order', {
+    const salesOrdersFunction = createLambdaFunction('SalesOrdersFunction',  {
       SALES_ORDERS_TABLE_NAME: salesOrdersTable.tableName,
       SPECIFIC_PRICES_TABLE_NAME: specificPricesTable.tableName,
     });
 
-    const purchaseOrdersFunction = createLambdaFunction('PurchaseOrdersFunction', 'src/handlers/purchase-order', {
+    const purchaseOrdersFunction = createLambdaFunction('PurchaseOrdersFunction', {
       PURCHASE_ORDERS_TABLE_NAME: purchaseOrdersTable.tableName,
       SPECIFIC_PRICES_TABLE_NAME: specificPricesTable.tableName,
     });
 
-    const suppliersFunction = createLambdaFunction('SuppliersFunction', 'src/handlers/supplier', {
+    const suppliersFunction = createLambdaFunction('SuppliersFunction', {
       SUPPLIERS_TABLE_NAME: suppliersTable.tableName,
     });
 
-    const productsFunction = createLambdaFunction('ProductsFunction', 'src/handlers/product', {
+    const productsFunction = createLambdaFunction('ProductsFunction',  {
       PRODUCTS_TABLE_NAME: productsTable.tableName,
     });
 
-    const specificPricesFunction = createLambdaFunction('SpecificPricesFunction', 'src/handlers/specific-price', {
+    const specificPricesFunction = createLambdaFunction('SpecificPricesFunction', {
       SPECIFIC_PRICES_TABLE_NAME: specificPricesTable.tableName,
     });
 
@@ -104,11 +104,7 @@ export class LetuceBackendStack extends cdk.Stack {
     });
 
     // Create Authorization Lambda Function
-    const authorizationFunction = createLambdaFunction('AuthorizationFunction', 'src/handlers/auth', {
-      // Add environment variables if the auth function interacts with DynamoDB
-      // For example:
-      // AUTH_TABLE_NAME: authTable.tableName,
-    });
+    const authorizationFunction = createLambdaFunction('AuthorizationFunction', {});
 
     // Create API Gateway
     const api = new apigateway.RestApi(this, 'LetuceApiGateway', {
