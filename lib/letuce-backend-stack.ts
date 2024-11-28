@@ -39,7 +39,7 @@ export class LetuceBackendStack extends cdk.Stack {
       return new lambda.Function(this, id, {
         runtime: lambda.Runtime.NODEJS_22_X,
         handler: 'index.handler',
-        code: lambda.Code.fromAsset(`${id}/dist`), // Reference the pre-built code
+        code: lambda.Code.fromAsset(`src/handlers/${id}/dist`), // Reference the pre-built code
         environment,
         timeout: cdk.Duration.seconds(10),
       });
@@ -54,29 +54,29 @@ export class LetuceBackendStack extends cdk.Stack {
     const specificPricesTable = createDynamoDBTable('SpecificPricesTable', 'specificPriceId');
 
     // Create Lambda Functions with Environment Variables
-    const customersFunction = createLambdaFunction('CustomersFunction',  {
+    const customersFunction = createLambdaFunction('customer',  {
       CUSTOMERS_TABLE_NAME: customersTable.tableName,
     });
 
-    const salesOrdersFunction = createLambdaFunction('SalesOrdersFunction',  {
+    const salesOrdersFunction = createLambdaFunction('sales-order',  {
       SALES_ORDERS_TABLE_NAME: salesOrdersTable.tableName,
       SPECIFIC_PRICES_TABLE_NAME: specificPricesTable.tableName,
     });
 
-    const purchaseOrdersFunction = createLambdaFunction('PurchaseOrdersFunction', {
+    const purchaseOrdersFunction = createLambdaFunction('purchase-order', {
       PURCHASE_ORDERS_TABLE_NAME: purchaseOrdersTable.tableName,
       SPECIFIC_PRICES_TABLE_NAME: specificPricesTable.tableName,
     });
 
-    const suppliersFunction = createLambdaFunction('SuppliersFunction', {
+    const suppliersFunction = createLambdaFunction('supplier', {
       SUPPLIERS_TABLE_NAME: suppliersTable.tableName,
     });
 
-    const productsFunction = createLambdaFunction('ProductsFunction',  {
+    const productsFunction = createLambdaFunction('product',  {
       PRODUCTS_TABLE_NAME: productsTable.tableName,
     });
 
-    const specificPricesFunction = createLambdaFunction('SpecificPricesFunction', {
+    const specificPricesFunction = createLambdaFunction('specific-price', {
       SPECIFIC_PRICES_TABLE_NAME: specificPricesTable.tableName,
     });
 
