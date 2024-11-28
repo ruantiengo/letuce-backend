@@ -10,31 +10,42 @@ export class LetuceBackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // const apiSpec = fs.readFileSync('openapi.yaml', 'utf8'); // Removed unused variable
-
+    /**
+     * Helper function to create a DynamoDB table.
+     * @param id - The unique identifier for the table.
+     * @param partitionKey - The partition key for the table.
+     * @returns The created DynamoDB table.
+     */
     const createDynamoDBTable = (id: string, partitionKey: string) => {
       return new dynamodb.Table(this, id, {
         partitionKey: { name: partitionKey, type: dynamodb.AttributeType.STRING },
         billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-        tableName: id,
-        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        tableName: id, // Ensure unique table names
+        removalPolicy: cdk.RemovalPolicy.DESTROY, // Change to RETAIN for production
       });
     };
 
-    const createLambdaFunction = (id: string, path: string, environment: { [key: string]: string }) => {
+    /**
+     * Helper function to create a Lambda function.
+     * @param id - The unique identifier for the Lambda function.
+     * @param path - The path to the Lambda function's code.
+     * @param environment - Environment variables to pass to the Lambda function.
+     * @returns The created Lambda function.
+     */
+    const createLambdaFunction = (
+      id: string,
+      environment: { [key: string]: string }
+    ) => {
       return new lambda.Function(this, id, {
         runtime: lambda.Runtime.NODEJS_22_X,
         handler: 'index.handler',
-        code: lambda.Code.fromAsset(path, {
-          bundling: {
-            image: lambda.Runtime.NODEJS_22_X.bundlingImage,
-            command: ["bash", "-c", "npm install && npm run build && cp -r dist/* /asset-output/index.js"],
-          }
-        }),
+        code: lambda.Code.fromAsset(`dist/${id}`), // Reference the pre-built code
         environment,
+        timeout: cdk.Duration.seconds(10),
       });
     };
 
+    // Create DynamoDB Tables
     const customersTable = createDynamoDBTable('CustomersTable', 'customerId');
     const purchaseOrdersTable = createDynamoDBTable('PurchaseOrdersTable', 'orderId');
     const salesOrdersTable = createDynamoDBTable('SalesOrdersTable', 'orderId');
@@ -42,6 +53,7 @@ export class LetuceBackendStack extends cdk.Stack {
     const productsTable = createDynamoDBTable('ProductsTable', 'productId');
     const specificPricesTable = createDynamoDBTable('SpecificPricesTable', 'specificPriceId');
 
+    // Create Lambda Functions with Environment Variables
     const customersFunction = createLambdaFunction('CustomersFunction', 'src/handlers/customer', {
       CUSTOMERS_TABLE_NAME: customersTable.tableName,
     });
@@ -68,6 +80,15 @@ export class LetuceBackendStack extends cdk.Stack {
       SPECIFIC_PRICES_TABLE_NAME: specificPricesTable.tableName,
     });
 
+    // Grant Read/Write Permissions to Lambda Functions
+    customersTable.grantReadWriteData(customersFunction);
+    purchaseOrdersTable.grantReadWriteData(purchaseOrdersFunction);
+    salesOrdersTable.grantReadWriteData(salesOrdersFunction);
+    suppliersTable.grantReadWriteData(suppliersFunction);
+    productsTable.grantReadWriteData(productsFunction);
+    specificPricesTable.grantReadWriteData(specificPricesFunction);
+
+    // Example Hello Function (Does not interact with DynamoDB)
     const helloFunction = new lambda.Function(this, 'HelloFunction', {
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
@@ -79,28 +100,57 @@ export class LetuceBackendStack extends cdk.Stack {
           };
         };
       `),
+      timeout: cdk.Duration.seconds(5),
     });
 
-    const authorizationFunction = createLambdaFunction('AuthorizationFunction', 'src/handlers/auth', {});
+    // Create Authorization Lambda Function
+    const authorizationFunction = createLambdaFunction('AuthorizationFunction', 'src/handlers/auth', {
+      // Add environment variables if the auth function interacts with DynamoDB
+      // For example:
+      // AUTH_TABLE_NAME: authTable.tableName,
+    });
 
+    // Create API Gateway
     const api = new apigateway.RestApi(this, 'LetuceApiGateway', {
       restApiName: 'Letuce API Gateway',
       description: 'API Gateway for Letuce Backend',
+      deployOptions: {
+        stageName: 'prod',
+      },
     });
 
+    // Create Lambda Authorizer
     const lambdaAuthorizer = new apigateway.TokenAuthorizer(this, 'LambdaAuthorizer', {
       handler: authorizationFunction,
+      identitySource: apigateway.IdentitySource.header('Authorization'),
     });
 
-    const addApiResource = (resource: apigateway.Resource, methods: string[], lambdaFunction: lambda.Function) => {
-      methods.forEach(method => {
-        resource.addMethod(method, new apigateway.LambdaIntegration(lambdaFunction), {
-          authorizer: lambdaAuthorizer,
-          authorizationType: apigateway.AuthorizationType.CUSTOM,
-        });
+    /**
+     * Helper function to add resources and methods to API Gateway.
+     * @param resource - The API Gateway resource.
+     * @param methods - Array of HTTP methods to add.
+     * @param lambdaFunction - The Lambda function to integrate.
+     */
+    const addApiResource = (
+      resource: apigateway.Resource,
+      methods: string[],
+      lambdaFunction: lambda.Function
+    ) => {
+      methods.forEach((method) => {
+        resource.addMethod(
+          method,
+          new apigateway.LambdaIntegration(lambdaFunction, {
+            proxy: true,
+          }),
+          {
+            authorizer: lambdaAuthorizer,
+            authorizationType: apigateway.AuthorizationType.CUSTOM,
+          }
+        );
       });
     };
 
+    // Define API Resources and Methods
     const helloResource = api.root.addResource('hello');
     addApiResource(helloResource, ['GET'], helloFunction);
 
@@ -128,13 +178,7 @@ export class LetuceBackendStack extends cdk.Stack {
     const priceResource = pricesResource.addResource('{id}');
     addApiResource(priceResource, ['GET', 'PUT', 'DELETE'], specificPricesFunction);
 
-    customersTable.grantReadWriteData(customersFunction);
-    purchaseOrdersTable.grantReadWriteData(purchaseOrdersFunction);
-    salesOrdersTable.grantReadWriteData(salesOrdersFunction);
-    suppliersTable.grantReadWriteData(suppliersFunction);
-    productsTable.grantReadWriteData(productsFunction);
-    specificPricesTable.grantReadWriteData(specificPricesFunction);
-
+    // Create Cognito User Pool
     const userPool = new cognito.UserPool(this, 'LetuceUserPool', {
       userPoolName: 'LetuceUserPool',
       selfSignUpEnabled: true,
@@ -146,25 +190,29 @@ export class LetuceBackendStack extends cdk.Stack {
         requireLowercase: true,
         requireDigits: true,
       },
+      removalPolicy: cdk.RemovalPolicy.DESTROY, // Change to RETAIN for production
     });
 
+    // Create Cognito User Pool Client
     const userPoolClient = new cognito.UserPoolClient(this, 'LetuceUserPoolClient', {
       userPool,
+      generateSecret: false,
     });
 
+    // Output API URL and Cognito Details
     new cdk.CfnOutput(this, 'ApiUrl', {
       value: api.url,
-      description: 'URL da API Gateway',
+      description: 'URL of the API Gateway',
     });
 
     new cdk.CfnOutput(this, 'UserPoolId', {
       value: userPool.userPoolId,
-      description: 'ID do Cognito User Pool',
+      description: 'ID of the Cognito User Pool',
     });
 
     new cdk.CfnOutput(this, 'UserPoolClientId', {
       value: userPoolClient.userPoolClientId,
-      description: 'ID do Cognito User Pool Client',
+      description: 'ID of the Cognito User Pool Client',
     });
   }
 }

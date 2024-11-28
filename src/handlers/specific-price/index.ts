@@ -1,8 +1,8 @@
-import { DynamoDB } from 'aws-sdk';
+import DynamoDB = require("aws-sdk/clients/dynamodb")
 import { v4 as uuidv4 } from 'uuid'; // Para gerar IDs únicos
 
 const dynamoDb = new DynamoDB.DocumentClient();
-const tableName = process.env.SPECIFIC_PRICES_TABLE_NAME!;
+const tableName = "SpecificPricesTable";
 
 export const handler = async (event: any) => {
   const { httpMethod, body, pathParameters } = event;

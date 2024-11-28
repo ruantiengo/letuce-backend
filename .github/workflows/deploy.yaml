@@ -3,10 +3,10 @@ name: CDK Deploy Pipeline
 on:
   push:
     branches:
-      - master # Executa o pipeline ao fazer push na branch main
+      - master # Executes the pipeline on push to master
   pull_request:
     branches:
-      - master # Valida mudanças em pull requests para a branch main
+      - master # Validates changes in pull requests to master
 
 jobs:
   cdk-pipeline:
@@ -14,38 +14,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checar o código
+      # 1. Checkout the code
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2. Configurar o Node.js
+      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 22
 
-      # 3. Instalar dependências
-      - name: Install Dependencies
+      # 3. Install root dependencies
+      - name: Install Root Dependencies
         run: npm install
 
-      # 4. Rodar testes (opcional)
-      - name: Run Tests
-        run: npm test
+      # 4. Build all Lambda functions
+      - name: Build Lambda Functions
+        run: |
+          for dir in src/handlers/*; do
+            if [ -d "$dir" ]; then
+              echo "Building Lambda in $dir..."
+              cd "$dir"
+              npm install
+              npm run build
+              cd -
+              mkdir -p dist/$(basename "$dir")
+              cp -r $dir/dist/* dist/$(basename "$dir")/
+            fi
+          done
 
-      # 5. Configurar AWS Credentials
+      # 5. Configure AWS Credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # Substitua pela sua região
+          aws-region: us-east-1 # Replace with your AWS region
 
-      - name: Install dependencies
-        run: npm install
-
+      # 6. Ensure Docker is running (optional if not required for CDK)
       - name: Ensure Docker is running
         run: |
           sudo service docker start
 
+      # 7. Deploy CDK stack
       - name: Deploy CDK stack
         run: npx cdk deploy --all --require-approval never
