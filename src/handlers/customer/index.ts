@@ -1,8 +1,8 @@
 import { DynamoDB } from 'aws-sdk';
 import { v7 as uuidv7 } from 'uuid';
+import { CUSTOMERS_TABLE } from '../../utils/tableNames';
 
 const dynamoDb = new DynamoDB.DocumentClient();
-const tableName = process.env.CUSTOMERS_TABLE_NAME!;
 
 export const handler = async (event: any) => {
   const { httpMethod, pathParameters, queryStringParameters, body } = event;
@@ -27,7 +27,7 @@ export const handler = async (event: any) => {
 
       await dynamoDb
         .put({
-          TableName: tableName,
+          TableName: CUSTOMERS_TABLE,
           Item: customer,
         })
         .promise();
@@ -44,7 +44,7 @@ export const handler = async (event: any) => {
         const { id } = pathParameters;
         const result = await dynamoDb
           .get({
-            TableName: tableName,
+            TableName: CUSTOMERS_TABLE,
             Key: { customerId: id },
           })
           .promise();
@@ -59,7 +59,7 @@ export const handler = async (event: any) => {
       // Obter todos os clientes (não deletados logicamente)
       const result = await dynamoDb
         .scan({
-          TableName: tableName,
+          TableName: CUSTOMERS_TABLE,
           FilterExpression: 'isDeleted = :isDeleted',
           ExpressionAttributeValues: { ':isDeleted': false },
         })
@@ -75,7 +75,7 @@ export const handler = async (event: any) => {
 
       await dynamoDb
         .update({
-          TableName: tableName,
+          TableName: CUSTOMERS_TABLE,
           Key: { customerId: id },
           UpdateExpression:
             'SET #nome = :nome, email = :email, cpfCnpj = :cpfCnpj, dataNascimento = :dataNascimento, endereco = :endereco, contatos = :contatos, habilitado = :habilitado, observacao = :observacao, sacLider = :sacLider',
@@ -105,7 +105,7 @@ export const handler = async (event: any) => {
 
       await dynamoDb
         .update({
-          TableName: tableName,
+          TableName: CUSTOMERS_TABLE,
           Key: { customerId: id },
           UpdateExpression: 'SET isDeleted = :isDeleted',
           ExpressionAttributeValues: {
