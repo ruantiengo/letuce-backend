@@ -39,7 +39,7 @@ export class LetuceBackendStack extends cdk.Stack {
       return new lambda.Function(this, id, {
         runtime: lambda.Runtime.NODEJS_22_X,
         handler: 'index.handler',
-        code: lambda.Code.fromAsset(`dist/${id}`), // Reference the pre-built code
+        code: lambda.Code.fromAsset(`${id}/dist`), // Reference the pre-built code
         environment,
         timeout: cdk.Duration.seconds(10),
       });
