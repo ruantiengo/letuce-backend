@@ -104,7 +104,7 @@ export class LetuceBackendStack extends cdk.Stack {
     });
 
     // Create Authorization Lambda Function
-    const authorizationFunction = createLambdaFunction('AuthorizationFunction', {});
+    const authorizationFunction = createLambdaFunction('auth', {});
 
     // Create API Gateway
     const api = new apigateway.RestApi(this, 'LetuceApiGateway', {
